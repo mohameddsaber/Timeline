@@ -5,12 +5,12 @@ import HeroGraph3D from './HeroGraph3D';
 const LandingPage = ({ onEnter }) => {
   return (
     <div className="h-screen w-full bg-zinc-950 flex flex-col items-center justify-between p-6 sm:p-12 font-sans selection:bg-cyan-900 overflow-hidden">
-      
+
       {/* Spacer to push content down slightly */}
       <div className="h-4 md:h-8 flex-none"></div>
 
       {/* Hero Text */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -26,7 +26,7 @@ const LandingPage = ({ onEnter }) => {
 
       {/* Floating Graph Visual */}
       <div className="relative w-full max-w-3xl flex-1 min-h-0 flex items-center justify-center my-4 md:my-8 z-0">
-        
+
         {/* Decorative Grid/Lines */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 md:w-96 h-[1px] bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-40 md:h-64 w-[1px] bg-gradient-to-b from-transparent via-zinc-800 to-transparent"></div>

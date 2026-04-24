@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import * as api from '../services/api';
 
-const ScenarioManager = ({ onOpenBuilder }) => {
+const ScenarioManager = ({ onOpenBuilder, onOpenSimulator }) => {
   const [scenarios, setScenarios] = useState([]);
   const [title, setTitle] = useState('');
   const [loading, setLoading] = useState(false);
@@ -71,12 +71,26 @@ const ScenarioManager = ({ onOpenBuilder }) => {
                 <h3 className="text-xl font-light text-zinc-200">{s.title}</h3>
                 <p className="text-xs font-mono text-zinc-600 mt-1">ID: {s._id}</p>
               </div>
-              <button 
-                onClick={() => onOpenBuilder(s._id)}
-                className="px-4 py-2 text-sm font-medium border border-zinc-700 text-zinc-300 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
-              >
-                Open Builder &rarr;
-              </button>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => onOpenSimulator(s.rootNode)}
+                  disabled={!s.rootNode}
+                  className={`px-4 py-2 text-sm font-medium rounded transition-colors ${
+                    s.rootNode 
+                      ? 'bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20' 
+                      : 'border border-zinc-800 text-zinc-700 cursor-not-allowed'
+                  }`}
+                  title={s.rootNode ? 'Play Simulator' : 'No Root Node set'}
+                >
+                  Play
+                </button>
+                <button 
+                  onClick={() => onOpenBuilder(s._id)}
+                  className="px-4 py-2 text-sm font-medium border border-zinc-700 text-zinc-300 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+                >
+                  Open Builder &rarr;
+                </button>
+              </div>
             </motion.div>
           ))}
           {scenarios.length === 0 && (

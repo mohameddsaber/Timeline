@@ -14,7 +14,14 @@ const LandingWrapper = () => {
 
 const ManagerWrapper = () => {
   const navigate = useNavigate();
-  return <ScenarioManager onOpenBuilder={(id) => navigate(`/builder/${id}`)} />;
+  return (
+    <ScenarioManager 
+      onOpenBuilder={(id) => navigate(`/builder/${id}`)} 
+      onOpenSimulator={(rootId) => {
+        if (rootId) navigate(`/simulator/${rootId}`);
+      }}
+    />
+  );
 };
 
 const BuilderWrapper = () => {

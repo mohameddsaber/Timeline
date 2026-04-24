@@ -4,19 +4,19 @@ import useSimulatorStore from '../store/useSimulatorStore';
 import { getNode, getBestPath } from '../services/api';
 
 const Simulator = ({ initialNodeId, onExit }) => {
-  const { 
-    currentNode, 
-    pathHistory, 
-    currentScore, 
-    setCurrentNode, 
-    makeChoice, 
+  const {
+    currentNode,
+    pathHistory,
+    currentScore,
+    setCurrentNode,
+    makeChoice,
     goBack,
-    reset 
+    reset
   } = useSimulatorStore();
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   const [isSimulationComplete, setIsSimulationComplete] = useState(false);
   const [bestPathData, setBestPathData] = useState(null);
   const [loadingResults, setLoadingResults] = useState(false);
@@ -36,7 +36,7 @@ const Simulator = ({ initialNodeId, onExit }) => {
         }
       }
     };
-    
+
     loadInitialNode();
   }, [initialNodeId, currentNode, pathHistory.length, setCurrentNode, error]);
 
@@ -84,7 +84,7 @@ const Simulator = ({ initialNodeId, onExit }) => {
 
     setLoading(true);
     setError(null);
-    
+
     try {
       const nextNode = await getNode(choice.nextNode);
       makeChoice(choice, nextNode);
@@ -122,17 +122,16 @@ const Simulator = ({ initialNodeId, onExit }) => {
           <button
             onClick={goBack}
             disabled={pathHistory.length === 0 || loading}
-            className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-              pathHistory.length === 0 || loading
+            className={`flex items-center gap-2 text-sm font-medium transition-colors ${pathHistory.length === 0 || loading
                 ? 'text-zinc-800 cursor-not-allowed'
                 : 'text-zinc-400 hover:text-zinc-100'
-            }`}
+              }`}
           >
             <span>&larr;</span> Go Back
           </button>
 
           <div className="text-zinc-500 text-xs font-semibold tracking-widest flex items-center">
-            SCORE 
+            SCORE
             <span className={`ml-3 text-xl font-light ${currentScore >= 0 ? 'text-zinc-200' : 'text-zinc-500'}`}>
               {currentScore}
             </span>
@@ -179,7 +178,7 @@ const Simulator = ({ initialNodeId, onExit }) => {
                           <span className="text-lg text-zinc-200 font-light tracking-wide mb-3">
                             {choice.text}
                           </span>
-                          
+
                           <div className="flex gap-4 mt-auto opacity-70 group-hover:opacity-100 transition-opacity">
                             {choice.reward > 0 && (
                               <span className="text-xs font-mono text-zinc-400">
@@ -212,23 +211,23 @@ const Simulator = ({ initialNodeId, onExit }) => {
                   <span className="text-2xl text-zinc-400">❖</span>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-light text-zinc-100 mb-8 tracking-wide">Simulation Complete</h1>
-                
+
                 <div className="flex flex-col md:flex-row gap-8 w-full max-w-4xl mb-12">
                   {/* User Score Card */}
                   <div className="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 text-center">
                     <h3 className="text-xs font-semibold tracking-widest text-zinc-500 uppercase mb-2">Your Final Score</h3>
                     <p className={`text-5xl font-light ${currentScore >= 0 ? 'text-zinc-100' : 'text-zinc-500'}`}>{currentScore}</p>
                   </div>
-                  
+
                   {/* Max Score Card */}
                   <div className="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 text-center relative overflow-hidden">
                     <h3 className="text-xs font-semibold tracking-widest text-zinc-500 uppercase mb-2">Optimal Score</h3>
                     {loadingResults ? (
-                       <div className="flex justify-center items-center h-12">
-                          <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 animate-pulse"></div>
-                       </div>
+                      <div className="flex justify-center items-center h-12">
+                        <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 animate-pulse"></div>
+                      </div>
                     ) : (
-                       <p className="text-5xl font-light text-zinc-100">{bestPathData?.maxScore || 0}</p>
+                      <p className="text-5xl font-light text-zinc-100">{bestPathData?.maxScore || 0}</p>
                     )}
                   </div>
                 </div>

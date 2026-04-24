@@ -72,3 +72,25 @@ export const addChoice = async (nodeId, data) => {
   if (!res.ok) throw new Error('Failed to add choice');
   return res.json();
 };
+
+export const getScenario = async (id) => {
+  const res = await fetch(`${BASE_URL}/scenarios/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch scenario');
+  return res.json();
+};
+
+export const updateChoice = async (nodeId, choiceId, data) => {
+  const res = await fetch(`${BASE_URL}/nodes/${nodeId}/choices/${choiceId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('Failed to update choice');
+  return res.json();
+};
+
+export const getBestPath = async (scenarioId) => {
+  const res = await fetch(`${BASE_URL}/scenarios/${scenarioId}/best-path`);
+  if (!res.ok) throw new Error('Failed to fetch best path');
+  return res.json();
+};

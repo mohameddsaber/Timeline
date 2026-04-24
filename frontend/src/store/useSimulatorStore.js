@@ -5,6 +5,8 @@ const useSimulatorStore = create((set, get) => ({
   pathHistory: [],
   currentScore: 0,
   
+  reset: () => set({ currentNode: null, pathHistory: [], currentScore: 0 }),
+  
   setCurrentNode: (node) => set({ currentNode: node }),
   
   makeChoice: (choice, nextNode) => {

@@ -46,7 +46,7 @@ function App() {
       )}
 
       {view === 'simulator' && simulatorRootId && (
-        <Simulator initialNodeId={simulatorRootId} key={simulatorRootId} />
+        <Simulator initialNodeId={simulatorRootId} key={simulatorRootId} onExit={() => setView('manager')} />
       )}
     </div>
   )

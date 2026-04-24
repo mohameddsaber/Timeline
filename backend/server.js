@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 5001; // Hardcoded to avoid port 5000 collision on macOS
 
 // Middleware
 app.use(cors());

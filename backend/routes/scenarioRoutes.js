@@ -25,6 +25,50 @@ router.post('/', async (req, res) => {
   }
 });
 
+// GET / - List all scenarios
+router.get('/', async (req, res) => {
+  try {
+    const scenarios = await Scenario.find().sort({ createdAt: -1 });
+    res.json(scenarios);
+  } catch (error) {
+    console.error('Error fetching scenarios:', error);
+    res.status(500).json({ error: 'Server error while fetching scenarios' });
+  }
+});
+
+// GET /:id/nodes - Get all nodes for a scenario
+router.get('/:id/nodes', async (req, res) => {
+  try {
+    const nodes = await Node.find({ scenario: req.params.id });
+    res.json(nodes);
+  } catch (error) {
+    console.error('Error fetching nodes:', error);
+    res.status(500).json({ error: 'Server error while fetching nodes' });
+  }
+});
+
+// PUT /:id - Update a scenario (e.g. to set rootNode)
+router.put('/:id', async (req, res) => {
+  try {
+    const { title, description, rootNode } = req.body;
+    
+    const scenario = await Scenario.findById(req.params.id);
+    if (!scenario) {
+      return res.status(404).json({ error: 'Scenario not found' });
+    }
+
+    if (title !== undefined) scenario.title = title;
+    if (description !== undefined) scenario.description = description;
+    if (rootNode !== undefined) scenario.rootNode = rootNode || null;
+
+    const updatedScenario = await scenario.save();
+    res.json(updatedScenario);
+  } catch (error) {
+    console.error('Error updating scenario:', error);
+    res.status(500).json({ error: 'Server error while updating scenario' });
+  }
+});
+
 // GET /:id/best-path - Calculate the best path using DFS
 router.get('/:id/best-path', async (req, res) => {
   try {

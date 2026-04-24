@@ -21,10 +21,18 @@ mongoose.connect(MONGODB_URI)
     console.error('MongoDB connection error:', err);
   });
 
+// Routes
+const scenarioRoutes = require('./routes/scenarioRoutes');
+const nodeRoutes = require('./routes/nodeRoutes');
+
 // Basic Route
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Future Paths API is running' });
 });
+
+// API Routes
+app.use('/api/scenarios', scenarioRoutes);
+app.use('/api/nodes', nodeRoutes);
 
 // Start Server
 app.listen(PORT, () => {

@@ -1,54 +1,53 @@
 import { useState } from 'react'
-import './App.css'
 import Simulator from './components/Simulator'
-import ScenarioBuilder from './components/ScenarioBuilder'
+import ScenarioManager from './components/ScenarioManager'
+import NodeBuilder from './components/NodeBuilder'
 
 function App() {
-  const [view, setView] = useState('builder') // 'simulator' or 'builder'
+  const [view, setView] = useState('manager') // 'manager', 'builder', 'simulator'
+  const [activeScenarioId, setActiveScenarioId] = useState(null)
+  const [simulatorRootId, setSimulatorRootId] = useState(null)
 
-  // This will just randomly pick a hardcoded ID for now if you haven't wired it up
-  // We can eventually lift state to pass a selected scenario ID to the Simulator
-  const [activeSimulatorNodeId, setActiveSimulatorNodeId] = useState(null);
+  const handleOpenBuilder = (id) => {
+    setActiveScenarioId(id)
+    setView('builder')
+  }
+
+  const handleOpenSimulator = (rootId) => {
+    if (!rootId) return;
+    setSimulatorRootId(rootId)
+    setView('simulator')
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200 p-4 mb-8 flex justify-center gap-4">
-        <button 
-          onClick={() => setView('builder')}
-          className={`px-5 py-2 rounded-lg font-medium transition-all duration-200 ${view === 'builder' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}
-        >
-          Scenario Builder
-        </button>
-        <button 
-          onClick={() => setView('simulator')}
-          className={`px-5 py-2 rounded-lg font-medium transition-all duration-200 ${view === 'simulator' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}
-        >
-          Simulator
-        </button>
-      </nav>
+    <div className="bg-zinc-950 min-h-screen text-zinc-100 selection:bg-zinc-800">
+      {/* Top Navbar for Simulator Exit */}
+      {view === 'simulator' && (
+        <nav className="fixed top-0 left-0 w-full p-6 z-50 pointer-events-none">
+           <button 
+            onClick={() => setView('builder')}
+            className="pointer-events-auto px-4 py-2 bg-zinc-900/80 backdrop-blur border border-zinc-800 text-zinc-400 text-xs font-medium uppercase tracking-widest rounded-lg hover:text-zinc-200 transition-colors shadow-lg"
+          >
+            &larr; Exit Simulator
+          </button>
+        </nav>
+      )}
 
-      <main>
-        {view === 'builder' ? (
-          <ScenarioBuilder />
-        ) : (
-          <div className="flex flex-col items-center gap-6">
-            <div className="text-center max-w-lg text-gray-500 text-sm p-4 bg-white rounded shadow-sm border">
-              <p>For the simulator to work seamlessly, paste a valid Root Node ID below, or simply hardcode one.</p>
-              <input 
-                placeholder="Paste Root Node ID here..."
-                value={activeSimulatorNodeId || ''}
-                onChange={e => setActiveSimulatorNodeId(e.target.value)}
-                className="mt-3 w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            {activeSimulatorNodeId ? (
-              <Simulator initialNodeId={activeSimulatorNodeId} key={activeSimulatorNodeId} />
-            ) : (
-              <p className="text-gray-400 italic">Please enter a Node ID above to start</p>
-            )}
-          </div>
-        )}
-      </main>
+      {view === 'manager' && (
+        <ScenarioManager onOpenBuilder={handleOpenBuilder} />
+      )}
+      
+      {view === 'builder' && activeScenarioId && (
+        <NodeBuilder 
+          scenarioId={activeScenarioId} 
+          onBack={() => setView('manager')} 
+          onOpenSimulator={handleOpenSimulator}
+        />
+      )}
+
+      {view === 'simulator' && simulatorRootId && (
+        <Simulator initialNodeId={simulatorRootId} key={simulatorRootId} />
+      )}
     </div>
   )
 }

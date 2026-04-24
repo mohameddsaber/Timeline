@@ -36,6 +36,18 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /:id - Get a single scenario
+router.get('/:id', async (req, res) => {
+  try {
+    const scenario = await Scenario.findById(req.params.id);
+    if (!scenario) return res.status(404).json({ error: 'Scenario not found' });
+    res.json(scenario);
+  } catch (error) {
+    console.error('Error fetching scenario:', error);
+    res.status(500).json({ error: 'Server error while fetching scenario' });
+  }
+});
+
 // GET /:id/nodes - Get all nodes for a scenario
 router.get('/:id/nodes', async (req, res) => {
   try {

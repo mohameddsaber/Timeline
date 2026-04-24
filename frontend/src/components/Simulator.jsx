@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import useSimulatorStore from '../store/useSimulatorStore';
 import { getNode } from '../services/api';
 
@@ -16,7 +17,6 @@ const Simulator = ({ initialNodeId }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Load initial node if we don't have one and an initialNodeId is provided
     const loadInitialNode = async () => {
       if (initialNodeId && !currentNode && pathHistory.length === 0) {
         setLoading(true);
@@ -24,7 +24,7 @@ const Simulator = ({ initialNodeId }) => {
           const node = await getNode(initialNodeId);
           setCurrentNode(node);
         } catch (err) {
-          setError('Failed to load initial node. Is the backend running?');
+          setError('Failed to load initial node.');
         } finally {
           setLoading(false);
         }
@@ -36,7 +36,6 @@ const Simulator = ({ initialNodeId }) => {
 
   const handleChoiceClick = async (choice) => {
     if (!choice.nextNode) {
-      // Leaf node / End of line: Update score and state, but nextNode is null
       makeChoice(choice, null);
       return;
     }
@@ -55,85 +54,149 @@ const Simulator = ({ initialNodeId }) => {
   };
 
   if (loading && !currentNode) {
-    return <div className="p-8 text-center text-gray-500 font-medium">Loading simulator...</div>;
+    return (
+      <div className="w-full min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-zinc-400 font-light">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 items-center">
+          <div className="w-2 h-2 rounded-full bg-zinc-500 animate-pulse"></div>
+          <div className="w-2 h-2 rounded-full bg-zinc-500 animate-pulse delay-75"></div>
+          <div className="w-2 h-2 rounded-full bg-zinc-500 animate-pulse delay-150"></div>
+        </motion.div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-4 md:p-6 space-y-6 font-sans">
-      {error && (
-        <div className="p-4 bg-red-50 text-red-700 rounded-md border border-red-200">
-          {error}
-        </div>
-      )}
+    <div className="w-full min-h-screen flex flex-col bg-zinc-950 text-zinc-100 font-sans selection:bg-zinc-800 overflow-hidden">
+      {/* Top Header */}
+      <header className="p-6 md:px-10 py-8 flex justify-between items-center w-full relative z-10">
+        <button
+          onClick={goBack}
+          disabled={pathHistory.length === 0 || loading}
+          className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+            pathHistory.length === 0 || loading
+              ? 'text-zinc-800 cursor-not-allowed'
+              : 'text-zinc-400 hover:text-zinc-100'
+          }`}
+        >
+          <span>&larr;</span> Go Back
+        </button>
 
-      {/* Main Node Display */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-6 md:p-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-            {currentNode ? currentNode.text : "Scenario Complete"}
-          </h2>
-
-          {/* Choices */}
-          {currentNode && currentNode.choices && currentNode.choices.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              {currentNode.choices.map((choice, index) => (
-                <button
-                  key={choice._id || index}
-                  onClick={() => handleChoiceClick(choice)}
-                  disabled={loading}
-                  className="px-5 py-4 text-left transition-colors bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 rounded-lg text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                >
-                  {choice.text}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="mt-6 p-5 bg-gray-50 rounded-lg border border-gray-200 text-center">
-              <p className="text-gray-700 font-medium text-lg">End of the line.</p>
-              <p className="text-gray-500 text-sm mt-1">There are no further choices.</p>
-            </div>
-          )}
+        <div className="text-zinc-500 text-xs font-semibold tracking-widest flex items-center">
+          SCORE 
+          <span className={`ml-3 text-xl font-light ${currentScore >= 0 ? 'text-zinc-200' : 'text-zinc-500'}`}>
+            {currentScore}
+          </span>
         </div>
-        
-        {/* Navigation & Score Bar */}
-        <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
-          <button
-            onClick={goBack}
-            disabled={pathHistory.length === 0 || loading}
-            className={`px-4 py-2 rounded-md font-medium transition-colors ${
-              pathHistory.length === 0
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 shadow-sm'
-            }`}
-          >
-            &larr; Go Back
-          </button>
-          
-          <div className="font-semibold text-gray-700 flex items-center gap-2">
-            Score: <span className={`text-xl font-bold ${currentScore >= 0 ? 'text-green-600' : 'text-red-500'}`}>{currentScore}</span>
+      </header>
+
+      {/* Main Content Centered */}
+      <main className="flex-1 flex flex-col justify-center items-center p-6 w-full max-w-2xl mx-auto relative z-10">
+        {error && (
+          <div className="mb-8 p-4 bg-red-950/20 text-red-400 rounded-lg border border-red-900/30 w-full text-center text-sm">
+            {error}
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* Path History Log */}
-      {pathHistory.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-medium text-gray-800 mb-4 border-b border-gray-100 pb-2">Journey History</h3>
-          <ul className="space-y-3 text-sm">
-            {pathHistory.map((step, index) => (
-              <li key={index} className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 py-1">
-                <div className="flex gap-3">
-                  <span className="text-gray-400 font-mono">#{index + 1}</span>
-                  <span className="text-gray-700 font-medium">{step.choiceText}</span>
+        <div className="w-full relative">
+          <AnimatePresence mode="wait">
+            {currentNode ? (
+              <motion.div
+                key={currentNode._id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="w-full flex flex-col items-center"
+              >
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-center text-zinc-100 mb-12">
+                  {currentNode.text}
+                </h1>
+
+                {/* Choices Grid */}
+                <div className="flex flex-col gap-4 w-full">
+                  {currentNode.choices && currentNode.choices.length > 0 ? (
+                    currentNode.choices.map((choice, idx) => (
+                      <motion.button
+                        key={choice._id || idx}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={() => handleChoiceClick(choice)}
+                        disabled={loading}
+                        className="group flex flex-col text-left px-6 py-5 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-500 hover:bg-zinc-800/40 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-wait w-full focus:outline-none focus:ring-2 focus:ring-zinc-600"
+                      >
+                        <span className="text-lg text-zinc-200 font-light tracking-wide mb-3">
+                          {choice.text}
+                        </span>
+                        
+                        <div className="flex gap-4 mt-auto opacity-70 group-hover:opacity-100 transition-opacity">
+                          {choice.reward > 0 && (
+                            <span className="text-xs font-mono text-zinc-400">
+                              <span className="text-zinc-600 uppercase tracking-widest text-[10px] mr-1.5">RWD</span>
+                              +{choice.reward}
+                            </span>
+                          )}
+                          {choice.effort > 0 && (
+                            <span className="text-xs font-mono text-zinc-400">
+                              <span className="text-zinc-600 uppercase tracking-widest text-[10px] mr-1.5">EFF</span>
+                              -{choice.effort}
+                            </span>
+                          )}
+                        </div>
+                      </motion.button>
+                    ))
+                  ) : (
+                    <div className="text-center py-12 w-full border border-dashed border-zinc-800/50 rounded-2xl">
+                      <p className="text-zinc-500 font-light text-lg">The journey ends here.</p>
+                    </div>
+                  )}
                 </div>
-                <span className={`font-mono text-xs ${step.choiceScore >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                  {step.choiceScore > 0 ? '+' : ''}{step.choiceScore} pts
-                </span>
-              </li>
-            ))}
-          </ul>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="end-of-line"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.5 }}
+                className="text-center py-16"
+              >
+                <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-6">
+                  <span className="text-2xl text-zinc-400">❖</span>
+                </div>
+                <h1 className="text-3xl font-light text-zinc-300 mb-3 tracking-wide">Journey Complete</h1>
+                <p className="text-zinc-500">Final Score: <span className="text-zinc-300">{currentScore}</span></p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      )}
+      </main>
+
+      {/* Path History Footer */}
+      <footer className="p-6 md:p-10 w-full mt-auto relative z-10">
+        <AnimatePresence>
+          {pathHistory.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="pt-6 border-t border-zinc-900/50"
+            >
+              <h3 className="text-[10px] font-semibold tracking-[0.2em] text-zinc-700 uppercase mb-4 text-center">Timeline</h3>
+              <div className="flex flex-wrap justify-center items-center gap-3 text-xs text-zinc-500">
+                {pathHistory.map((step, index) => (
+                  <React.Fragment key={index}>
+                    <span className="bg-zinc-900/30 px-4 py-2 rounded-full border border-zinc-800/30 font-light text-zinc-400 truncate max-w-[200px]">
+                      {step.choiceText}
+                    </span>
+                    {index < pathHistory.length - 1 && (
+                      <span className="text-zinc-800 text-[10px]">&rarr;</span>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </footer>
     </div>
   );
 };
